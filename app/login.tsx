@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function LoginScreen() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +73,11 @@ export default function LoginScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+                <TouchableOpacity 
+                    style={styles.button} 
+                    activeOpacity={0.8}
+                    onPress={() => router.replace('/(drawer)/(tabs)')}
+                >
                     <Text style={styles.buttonText}>Entrar</Text>
                     <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 5 }} />
                 </TouchableOpacity>
