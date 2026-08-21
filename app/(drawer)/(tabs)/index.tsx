@@ -5,6 +5,8 @@ import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, Image, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
+import * as Location from 'expo-location';
+import { Container } from '../../../src/factories/Container';
 
 export default function CameraScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
@@ -78,7 +80,32 @@ function MostraFoto({ uri, setUri }: { uri: string; setUri: (uri: string | null)
         if (status === 'granted') {
             try {
                 await MediaLibrary.saveToLibraryAsync(uri);
-                Alert.alert("Sucesso!", "Foto salva na galeria!");
+                
+                // Pedimos permissão de localização
+                let locationPermission = await Location.requestForegroundPermissionsAsync();
+                let latitude = 0;
+                let longitude = 0;
+
+                // Se permitido, pegamos a coordenada real do GPS
+                if (locationPermission.status === 'granted') {
+                    const currentLocation = await Location.getCurrentPositionAsync({});
+                    latitude = currentLocation.coords.latitude;
+                    longitude = currentLocation.coords.longitude;
+                }
+                
+                // Salvando no nosso repositório via caso de uso!
+                const container = Container.getInstance();
+                await container.registerObservation.execute({
+                    latitude: latitude, 
+                    longitude: longitude,
+                    photo: uri
+                });
+                
+                // Apenas para vermos no terminal se salvou:
+                const todasAsObservacoes = await container.listObservations.execute();
+                console.log("Observações em Memória:", todasAsObservacoes);
+
+                Alert.alert("Sucesso!", "Foto e observação salvas!");
             } catch (error) {
                 console.log("Erro ao salvar foto", error);
                 Alert.alert("Erro", "Não foi possível salvar a foto.");
